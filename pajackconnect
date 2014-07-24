@@ -8,11 +8,11 @@
 # Usage: in QjackCtl’s Settings window, in the “Options” tab, enter
 # the command
 #
-#     pajackconnect load
+#     pajackconnect start
 #
 # in the field labelled “Execute script after Startup”, and put
 #
-#     pajackconnect unload
+#     pajackconnect stop
 #
 # in the field labelled “Execute script on Shutdown”.
 #
@@ -31,12 +31,12 @@ if [ "$#" == 1 ]; then
 else
     cmd=
 fi
-if [ "$cmd" != "load" -a "$cmd" != "unload" ]; then
-    echo $'Usage:\n\t'"$0"$' load|unload\n' 1>&2
+if [ "$cmd" != "start" -a "$cmd" != "stop" ]; then
+    echo $'Usage:\n\t'"$0"$' start|stop\n' 1>&2
     exit 3
 fi
 
-if [ "$cmd" = "load" ]; then
+if [ "$cmd" = "start" ]; then
     # module-jack-sink and module-jack-source let PulseAudio route
     # its inputs and outputs through a running instance of JACK.
     # These modules automatically unload when JACK goes away.
@@ -49,7 +49,7 @@ if [ "$cmd" = "load" ]; then
     # after PulseAudio is restarted (on unload, below).
     pacmd unload-module module-suspend-on-idle
     pacmd set-default-sink jack_out
-else
+elif [ "$cmd" = "stop" ]; then
     # only way to restore normal operation after JACK quits seems to be to
     # force PulseAudio to restart
     pulseaudio -k
