@@ -1,0 +1,57 @@
+#!/bin/bash
+#+
+# This script is intended to be invoked via QjackCtl to start up and
+# shut down JACK on a system running PulseAudio. It handles the
+# necessary setup to make the two work together, so PulseAudio clients
+# get transparently routed through JACK while the latter is running.
+#
+# Usage: in QjackCtl’s Settings window, in the “Options” tab, enter
+# the command
+#
+#     pajackconnect load
+#
+# in the field labelled “Execute script after Startup”, and put
+#
+#     pajackconnect unload
+#
+# in the field labelled “Execute script on Shutdown”.
+#
+# References:
+#     PulseAudio: <http://www.freedesktop.org/wiki/Software/PulseAudio/>
+#     JACK: <http://jackaudio.org/>
+#
+# Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>. This
+# script is licensed CC0
+# <https://creativecommons.org/publicdomain/zero/1.0/>; do with it
+# what you will.
+#-
+
+if [ "$#" == 1 ]; then
+    cmd="$1"
+else
+    cmd=
+fi
+if [ "$cmd" != "load" -a "$cmd" != "unload" ]; then
+    echo $'Usage:\n\t'"$0"$' load|unload\n' 1>&2
+    exit 3
+fi
+
+if [ "$cmd" = "load" ]; then
+    # module-jack-sink and module-jack-source let PulseAudio route
+    # its inputs and outputs through a running instance of JACK.
+    # These modules automatically unload when JACK goes away.
+    # Trivia question: what’s the difference between pacmd and pactl?
+    pacmd load-module module-jack-sink channels=2
+    pacmd load-module module-jack-source channels=2
+    # module-suspend-on-idle kicks in to suspend idle sinks. Unfortunately
+    # this causes the JACK sink to be suspended, and there seems to be no
+    # way to resume it. So this module needs to go. It will come back
+    # after PulseAudio is restarted (on unload, below).
+    pacmd unload-module module-suspend-on-idle
+    pacmd set-default-sink jack_out
+    a2jmidid -e &
+else
+    # only way to restore normal operation after JACK quits seems to be to
+    # force PulseAudio to restart
+    pulseaudio -k
+fi
