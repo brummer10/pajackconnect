@@ -49,7 +49,6 @@ if [ "$cmd" = "load" ]; then
     # after PulseAudio is restarted (on unload, below).
     pacmd unload-module module-suspend-on-idle
     pacmd set-default-sink jack_out
-    a2jmidid -e &
 else
     # only way to restore normal operation after JACK quits seems to be to
     # force PulseAudio to restart
