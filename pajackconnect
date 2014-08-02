@@ -20,7 +20,7 @@
 #     PulseAudio: <http://www.freedesktop.org/wiki/Software/PulseAudio/>
 #     JACK: <http://jackaudio.org/>
 #
-# Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>. This
+# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>. This
 # script is licensed CC0
 # <https://creativecommons.org/publicdomain/zero/1.0/>; do with it
 # what you will.
