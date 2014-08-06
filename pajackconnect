@@ -49,7 +49,10 @@ if [ "$cmd" = "start" ]; then
     # after PulseAudio is restarted (on unload, below).
     pacmd unload-module module-suspend-on-idle
     pacmd set-default-sink jack_out
+    # Fun fact: if jackd wasn’t running before you used this script, PulseAudio
+    # seems to automatically start it.
 elif [ "$cmd" = "stop" ]; then
+    killall jackd # for symmetry, in case it was started by PulseAudio
     # only way to restore normal operation after JACK quits seems to be to
     # force PulseAudio to restart
     pulseaudio -k
