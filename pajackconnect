@@ -40,6 +40,7 @@
 #-
 
 
+# check for given command-line option
 if [ "$#" == 1 ]; then
 	cmd="$1"
 else
@@ -50,42 +51,60 @@ if [ "$cmd" != "start" -a "$cmd" != "stop" -a "$cmd" != "reset" ]; then
 	exit 3
 fi
 
+# variable to fetch pasuspender status 
 p=`ps ax | grep pasuspender`
+
+# if command-line option start is given
 if [ "$cmd" = "start" ]; then
+	# check if pasuspender waiting for jack, if so, exit here. Nothing more
+	# to do.
 	if [[ "$p"  =~ "jackd" ]]; then
 		#echo "pasuspender is active"
 		exit
 	else
+		# if pasuspender isn't waiting for jack, let's fetch the current
+		# ports, pulseaudio use, save them to /tmp, for later use.
 		#echo "pasuspender is NOT active"
 		sink=`pacmd list short sinks |  sed -n "/Default sink name/p"| sed "s/Default sink name://"`
 		`echo $sink >/tmp/pasinkj`
 		source=`pacmd list short sinks |  sed -n "/Default source name/p"| sed "s/Default source name://"`
 		`echo $source >/tmp/pasourcej`
+		# load the pulseaudio jack module and set them as default ports
 		pacmd load-module module-jack-sink channels=2
 		pacmd load-module module-jack-source channels=2
 		pacmd unload-module module-suspend-on-idle
 		pacmd set-default-sink jack_out
-		# move around source port, seems to make it work with jack
+		# move around source port, seems to make pulseaudio work with jack
+		# otherwise it seems that pulseaudio is connected, but it didn't work.
 		pacmd set-default-source jack_in && sleep 1
 		pacmd set-default-source $source && sleep 1
 		pacmd set-default-source jack_in
 		#echo "pa source switched"
 	fi
+# if command-line option stop is given
 elif [ "$cmd" = "stop" ]; then
+	# again, check if pasuspender waiting for jack, if not, unload the pulse
+	# jack module and reload the module-suspend-on-idle. 
 	if [[ ! "$p"  =~ "jackd" ]]; then
 		#echo "pasuspender is NOT active"
 		pacmd unload-module module-jack-sink
 		pacmd unload-module module-jack-source
 		pacmd load-module module-suspend-on-idle
 	else
+		# if pasuspender waiting for jack, add a timeout to pasuspender
+		# to allow a smooth reset action afterward. 
 		#echo "pasuspender is active"
 		pasuspender -- sleep 5 &
 	fi
+# if command-line option reset is given
 elif [ "$cmd" = "reset" ]; then
+	# check if we have add a timeout to pasuspender, if so, exit here.
 	if [[ "$p"  =~ "sleep" ]]; then
 		#echo "pasuspender is active"
 		exit
 	else
+		# fetch the previous saved pulse audio ports and set them back 
+		# as default ports for pulseaudio. Done.
 		sink=`cat /tmp/pasinkj`
 		source=`cat /tmp/pasourcej`
 		pacmd set-default-sink $sink 
