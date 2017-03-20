@@ -1,0 +1,16 @@
+Source: pajackconnect
+Section: unknown
+Priority: optional
+Maintainer: hermann <brummer@org>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.8
+Homepage: https://github.com/brummer10/pajackconnect
+#Vcs-Git: https://anonscm.debian.org/collab-maint/pajackconnect.git
+#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/pajackconnect.git
+
+Package: pajackconnect
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, dh-systemd (>= 1.5) 
+Description: Start/stop JACK on a system running PulseAudio via QjackCtl
+A Script to start up and shut down JACK on a system running PulseAudio via QjackCtl
+Including a systemd.service file to handle resume after suspend.

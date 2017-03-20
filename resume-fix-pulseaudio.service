@@ -1,0 +1,12 @@
+[Unit]
+Description=Fix PulseAudio after resume from suspend
+After=suspend.target
+
+[Service]
+User=USERNAME
+Type=oneshot
+Environment="XDG_RUNTIME_DIR=/run/user/USERID"
+ExecStart=/usr/bin/pajackconnect restart
+
+[Install]
+WantedBy=suspend.target
