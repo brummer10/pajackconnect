@@ -29,8 +29,14 @@ and save settings as 'Pulse'. Now you can select from the
 Qjackctl setting window, if you would start jack with or without pulse.
 
 To make it work after suspend, the file resume-fix-pulseaudio.service needs to be installed and enabled. 
-If you use the debian package, the package installer handle that for you, 
-on other distributions you need to first edit the file resume-fix-pulseaudio.service
+If you use the debian package, the package installer handle that for you.
+
+###DEBIAN
+Build package with:
+```
+dpkg-buildpackage -rfakeroot -uc -us -b
+```
+On other distributions you need to first edit the file resume-fix-pulseaudio.service
 and replace USERNAME with your User name (logname) and USERID with your users ID (id -u $(logname))
 
 after install you need to run (as root)
