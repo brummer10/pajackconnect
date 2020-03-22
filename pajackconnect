@@ -73,16 +73,16 @@ function restart() {
 	# check if pulseaudio is running
 	pa=`pidof pulseaudio | wc -w`
 	# write results to log file
-	`date +%H:%M:%S  >>"$pajack_dir/pajack.log"`
-	`echo 'jack-sink =' $jc  >>"$pajack_dir/pajack.log"`
-	`echo 'jack =' $ja >>"$pajack_dir/pajack.log"`
-	`echo 'pulse =' $pa >>"$pajack_dir/pajack.log"`
+	date +%H:%M:%S  >>"$pajack_dir/pajack.log"
+	echo 'jack-sink =' $jc  >>"$pajack_dir/pajack.log"
+	echo 'jack =' $ja >>"$pajack_dir/pajack.log"
+	echo 'pulse =' $pa >>"$pajack_dir/pajack.log"
 		if [[ ! "$jc" =~ "jack" ]] && [[ "$ja" == "1" ]]; then
 			# if pulseaudio didn't run, let's try start it
 			if [[ ! "$pa" == "1" ]]; then
 				sleep 5
-				`pulseaudio -D`
-				`echo reload pulseaudio >>"$pajack_dir/pajack.log"`
+				pulseaudio -D
+				echo reload pulseaudio >>"$pajack_dir/pajack.log"
 				sleep 10
 			fi
 			# if jack is running and pulse jack modules aren't loaded,
@@ -98,9 +98,9 @@ function restart() {
 			pacmd set-default-source $source && sleep 1
 			pacmd set-default-source jack_in
 			# echo "pa source switched"
-			`echo reloaded jack modules >>"$pajack_dir/pajack.log"`
+			echo reloaded jack modules >>"$pajack_dir/pajack.log"
 		else
-			`echo already run >>"$pajack_dir/pajack.log"`
+			echo already run >>"$pajack_dir/pajack.log"
 		fi
 	fi
 }
@@ -117,9 +117,9 @@ function start() {
 		# ports, pulseaudio use, save them to "$pajack_dir", for later use.
 		#echo "pasuspender is NOT active"
 		sink=`pacmd list short sinks |  sed -n "/Default sink name/p"| sed "s/Default sink name://"`
-		`echo $sink >"$pajack_dir"/pasinkj`
+		echo $sink >"$pajack_dir"/pasinkj
 		source=`pacmd list short sinks |  sed -n "/Default source name/p"| sed "s/Default source name://"`
-		`echo $source >"$pajack_dir"/pasourcej`
+		echo $source >"$pajack_dir"/pasourcej
 		# load the pulseaudio jack module and set them as default ports
 		pacmd load-module module-jack-sink channels=2
 		pacmd load-module module-jack-source channels=2
