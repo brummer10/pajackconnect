@@ -46,6 +46,13 @@
 
 # variable to fetch pasuspender status 
 p=`ps ax | grep pasuspender`
+if [ "${XDG_RUNTIME_DIR-}" != "" ]
+then
+  pajack_dir="$XDG_RUNTIME_DIR/pulse"
+else
+  pajack_dir="/tmp/pajackconnect-${LOGNAME-${USER-}}"
+fi
+mkdir -m 700 -p "$pajack_dir"
 
 function restart() {
 	# reload pulse jack module after resume from suspend.
@@ -66,16 +73,16 @@ function restart() {
 	# check if pulseaudio is running
 	pa=`pidof pulseaudio | wc -w`
 	# write results to log file
-	`date +%H:%M:%S  >>/tmp/pajack.log`
-	`echo 'jack-sink =' $jc  >>/tmp/pajack.log`
-	`echo 'jack =' $ja >>/tmp/pajack.log`
-	`echo 'pulse =' $pa >>/tmp/pajack.log`
+	`date +%H:%M:%S  >>"$pajack_dir/pajack.log"`
+	`echo 'jack-sink =' $jc  >>"$pajack_dir/pajack.log"`
+	`echo 'jack =' $ja >>"$pajack_dir/pajack.log"`
+	`echo 'pulse =' $pa >>"$pajack_dir/pajack.log"`
 		if [[ ! "$jc" =~ "jack" ]] && [[ "$ja" == "1" ]]; then
 			# if pulseaudio didn't run, let's try start it
 			if [[ ! "$pa" == "1" ]]; then
 				sleep 5
 				`pulseaudio -D`
-				`echo reload pulseaudio >>/tmp/pajack.log`
+				`echo reload pulseaudio >>"$pajack_dir/pajack.log"`
 				sleep 10
 			fi
 			# if jack is running and pulse jack modules aren't loaded,
@@ -87,13 +94,13 @@ function restart() {
 			# move around source port, seems to make pulseaudio work with jack
 			# otherwise it seems that pulseaudio is connected, but it didn't work.
 			pacmd set-default-source jack_in && sleep 1
-			source=`cat /tmp/pasourcej`
+			source=`cat "$pajack_dir"/pasourcej`
 			pacmd set-default-source $source && sleep 1
 			pacmd set-default-source jack_in
 			# echo "pa source switched"
-			`echo reloaded jack modules >>/tmp/pajack.log`
+			`echo reloaded jack modules >>"$pajack_dir/pajack.log"`
 		else
-			`echo already run >>/tmp/pajack.log`
+			`echo already run >>"$pajack_dir/pajack.log"`
 		fi
 	fi
 }
@@ -107,12 +114,12 @@ function start() {
 		exit 0
 	else
 		# if pasuspender isn't waiting for jack, let's fetch the current
-		# ports, pulseaudio use, save them to /tmp, for later use.
+		# ports, pulseaudio use, save them to "$pajack_dir", for later use.
 		#echo "pasuspender is NOT active"
 		sink=`pacmd list short sinks |  sed -n "/Default sink name/p"| sed "s/Default sink name://"`
-		`echo $sink >/tmp/pasinkj`
+		`echo $sink >"$pajack_dir"/pasinkj`
 		source=`pacmd list short sinks |  sed -n "/Default source name/p"| sed "s/Default source name://"`
-		`echo $source >/tmp/pasourcej`
+		`echo $source >"$pajack_dir"/pasourcej`
 		# load the pulseaudio jack module and set them as default ports
 		pacmd load-module module-jack-sink channels=2
 		pacmd load-module module-jack-source channels=2
@@ -153,8 +160,8 @@ function reset() {
 	else
 		# fetch the previous saved pulse audio ports and set them back 
 		# as default ports for pulseaudio. Done.
-		sink=`cat /tmp/pasinkj`
-		source=`cat /tmp/pasourcej`
+		sink=`cat "$pajack_dir"/pasinkj`
+		source=`cat "$pajack_dir"/pasourcej`
 		pacmd set-default-sink $sink 
 		pacmd set-default-source $source 
 		#echo "pasuspender is NOT active"
