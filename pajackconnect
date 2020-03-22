@@ -45,7 +45,7 @@
 
 
 # variable to fetch pasuspender status 
-p=`ps ax | grep pasuspender`
+p=`ps ax | grep '[p]asuspender'`
 if [ "${XDG_RUNTIME_DIR-}" != "" ]
 then
   pajack_dir="$XDG_RUNTIME_DIR/pulse"
