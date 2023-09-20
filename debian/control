@@ -10,5 +10,5 @@ Homepage: https://github.com/brummer10/pajackconnect
 
 Package: pajackconnect
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, dh-systemd (>= 1.5) 
+Depends: ${shlibs:Depends}, ${misc:Depends}, debhelper (>= 9.20160709) | dh-systemd (>= 1.5) 
 Description: Start/stop JACK on a system running PulseAudio via QjackCtl, includes systemd service file for Suspend.
